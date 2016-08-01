@@ -231,10 +231,10 @@ class S2CellId {
     }
     
     func prev() -> S2CellId{
-        return S2CellId(id: id - (lsb() << 1))
+        return S2CellId(id: id - (lsb() << 30))
     }
     
     func next() -> S2CellId {
-        return S2CellId(id: id + (lsb() << 1))
+        return S2CellId(id: id + (lsb() << 30))
     }
 }

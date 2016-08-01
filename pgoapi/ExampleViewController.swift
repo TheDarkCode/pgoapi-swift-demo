@@ -14,7 +14,7 @@ class ExampleViewController: UIViewController, AuthDelegate, PGoApiDelegate {
         super.viewDidLoad()
         
         Auth.sharedInstance.delegate = self
-        Auth.sharedInstance.login("login", password: "password")
+        Auth.sharedInstance.login("TEST_PTC_USERNAME", password: "TEST_PTC_PASSWORD")
     }
     
     func didReceiveAuth() {
@@ -32,11 +32,19 @@ class ExampleViewController: UIViewController, AuthDelegate, PGoApiDelegate {
     func didReceiveApiResponse(intent: ApiIntent, response: ApiResponse) {
         print("Got that API response: \(intent)")
         if (intent == .Login) {
-            Api.endpoint = "https://\((response.response as! Pogoprotos.Networking.Envelopes.ResponseEnvelope).apiUrl)/rpc"
-            print("New endpoint: \(Api.endpoint)")
             let request = PGoApiRequest()
-            request.getMapObjects(0, longitude: 0)
-            request.makeRequest(.GetMapObjects, delegate: self)
+            Location.alt = 0
+            Location.lat = TEST_LATITUDE
+            Location.long = TEST_LONGITUDE
+            request.getPlayer()
+            request.makeRequest(.getPlayer, delegate: self)
+            Api.endpoint = "https://\((response.response as! Pogoprotos.Networking.Envelopes.ResponseEnvelope).apiUrl)/rpc"
+            Api.authToken = (response.response as! Pogoprotos.Networking.Envelopes.ResponseEnvelope).authTicket
+            Api.receivedToken = true
+            print("New endpoint: \(Api.endpoint)")
+            let request2 = PGoApiRequest()
+            request2.getMapObjects(TEST_LATITUDE, longitude: TEST_LONGITUDE)
+            request2.makeRequest(.GetMapObjects, delegate: self)
         } else if (intent == .GetMapObjects) {
             print("Got map objects!")
             print("---------\n---------")

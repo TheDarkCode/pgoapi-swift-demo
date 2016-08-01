@@ -88,44 +88,30 @@ class PGoApiRequest {
 
     func getMapObjects(latitude: Double, longitude: Double) {
         let messageBuilder = Pogoprotos.Networking.Requests.Messages.GetMapObjectsMessage.Builder()
-        
-        let cells: [AnyObject] = s2geometry.cellsForCoordinate(CLLocationCoordinate2D(latitude: latitude, longitude: longitude))
-        
-        let date = NSDate()
-        
-        let timestamp = date.timeIntervalSince1970
-        
-        for cell in cells {
-            
-            guard let c = cell as? String else {
-                
-                return
-                
-            }
-            
-            var result: UInt64 = 0
-            let scanner: NSScanner = NSScanner.localizedScannerWithString(c) as! NSScanner
-            
-            scanner.scanHexLongLong(&result)
-            
-            messageBuilder.cellId.append(result)
-            messageBuilder.sinceTimestampMs.append(Int64(timestamp))
-            
-        }
-        
         messageBuilder.latitude = latitude
         messageBuilder.longitude = longitude
+        messageBuilder.sinceTimestampMs = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
         
+        let cell = S2CellId(p: S2LatLon(latDegrees: latitude, lonDegrees: longitude).toPoint())
+        var cells: [UInt64] = []
+        
+        var currentCell = cell
+        for _ in 0..<10 {
+            currentCell = currentCell.prev()
+            cells.insert(currentCell.id, atIndex: 0)
+        }
+        
+        cells.append(cell.id)
+        
+        currentCell = cell
+        for _ in 0..<10 {
+            currentCell = currentCell.next()
+            cells.append(currentCell.id)
+        }
+        
+        messageBuilder.cellId = cells
         methodList.append(ApiMethod(id: .GetMapObjects, message: try! messageBuilder.build(), parser: { data in
             return try! Pogoprotos.Networking.Responses.GetMapObjectsResponse.parseFromData(data)
         }))
-        
-        getHatchedEggs()
-        
-        getInventory()
-        
-        checkAwardedBadges()
-        
-        downloadSettings()
     }
 }
