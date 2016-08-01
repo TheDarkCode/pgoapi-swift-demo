@@ -14,7 +14,7 @@ class ExampleViewController: UIViewController, AuthDelegate, PGoApiDelegate {
         super.viewDidLoad()
         
         Auth.sharedInstance.delegate = self
-        Auth.sharedInstance.login("TEST_PTC_USERNAME", password: "TEST_PTC_PASSWORD")
+        Auth.sharedInstance.login("\(TEST_PTC_USERNAME)", password: "\(TEST_PTC_PASSWORD)")
     }
     
     func didReceiveAuth() {
@@ -50,6 +50,17 @@ class ExampleViewController: UIViewController, AuthDelegate, PGoApiDelegate {
             print("---------\n---------")
             print(response.response)
             print(response.subresponses)
+            
+            let r = response.subresponses[0] as! Pogoprotos.Networking.Responses.GetMapObjectsResponse
+            
+            for mapCell in r.mapCells {
+                print(mapCell.s2CellId)
+                print(mapCell.nearbyPokemons)
+                print(mapCell.wildPokemons)
+                print(mapCell.catchablePokemons)
+                
+            }
+            
         }
     }
     
