@@ -10,7 +10,7 @@ import Foundation
 import ProtocolBuffers
 
 
-protocol PGoApiDelegate {
-    func didReceiveApiResponse(intent: ApiIntent, response: ApiResponse)
-    func didReceiveApiError(intent: ApiIntent, statusCode: Int?)
+public protocol PGoApiDelegate {
+    func didReceiveApiResponse(intent: PGoApiIntent, response: PGoApiResponse)
+    func didReceiveApiError(intent: PGoApiIntent, statusCode: Int?)
 }

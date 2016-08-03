@@ -10,6 +10,8 @@ import UIKit
 
 class ExampleViewController: UIViewController, AuthDelegate, PGoApiDelegate {
     
+    var pokemonToUpload: [AnyObject] = []
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -53,13 +55,104 @@ class ExampleViewController: UIViewController, AuthDelegate, PGoApiDelegate {
             
             let r = response.subresponses[0] as! Pogoprotos.Networking.Responses.GetMapObjectsResponse
             
-            for mapCell in r.mapCells {
-                print(mapCell.s2CellId)
-                print(mapCell.nearbyPokemons)
-                print(mapCell.wildPokemons)
-                print(mapCell.catchablePokemons)
+            var catchablePokemon: [AnyObject] = []
+            var wildPokemon: [AnyObject] = []
+            var nearbyPokemon: [AnyObject] = []
+            var selectedLocation: Pogoprotos.Map.Fort.FortData?
+            
+            guard let nextLocation: Pogoprotos.Map.Fort.FortData = r.mapCells[0].forts[0] else {
+                guard let nextLocation: Pogoprotos.Map.Fort.FortData = r.mapCells[1].forts[0] else {
+                    guard let nextLocation: Pogoprotos.Map.Fort.FortData = r.mapCells[2].forts[0] else {
+                        guard let nextLocation: Pogoprotos.Map.Fort.FortData = r.mapCells[3].forts[0] else {
+                            
+                            return
+                            
+                        }
+                        return
+                        
+                    }
+                    return
+                    
+                }
+                return
                 
             }
+            
+            for mapCell in r.mapCells {
+                
+                //print(mapCell.s2CellId)
+                for catchable in mapCell.catchablePokemons {
+                    
+                    catchablePokemon.append(catchable)
+                    
+                }
+                
+                for wild in mapCell.wildPokemons {
+                    
+                    wildPokemon.append(wild)
+                    
+                }
+                
+                for nearby in mapCell.nearbyPokemons {
+                    
+                    nearbyPokemon.append(nearby)
+                    
+                }
+                
+                
+            }
+            
+            if catchablePokemon.count > 0 {
+                print("Got catchable objects!")
+                print("---------\n---------")
+                print(catchablePokemon.debugDescription)
+                
+                for pokemon in (catchablePokemon as! [Pogoprotos.Map.Pokemon.MapPokemon])  {
+                    
+                    pokemonToUpload.append(pokemon)
+                    
+                     // set location to pokemon.Latitude / Longitude
+//                    let request2 = PGoApiRequest()
+//                    request2.getMapObjects(pokemon.latitude ?? Location.lat, longitude: pokemon.longitude ?? Location.long)
+//                    request2.makeRequest(.GetMapObjects, delegate: self)
+                    
+                    
+                    // EncounterPokemon response
+                    
+                    // Pokemon CP
+                    
+                    // Pokemon IV
+                    
+                    // Catch Pokemon Response
+                    
+                    
+                    
+                }
+                
+            }
+            if wildPokemon.count > 0 {
+                print("Got wild objects!")
+                print("---------\n---------")
+                print(wildPokemon.debugDescription)
+            }
+            if nearbyPokemon.count > 0 {
+                print("Got nearby objects!")
+                print("---------\n---------")
+                print(nearbyPokemon.debugDescription)
+            }
+            print("Pokemon to Upload!")
+            print("---------\n---------")
+            print(pokemonToUpload.debugDescription)
+            
+            print("Next Location!")
+            print("---------\n---------")
+            print((nextLocation.debugDescription ?? "No next location."))
+            
+            selectedLocation = nextLocation
+            
+            let request2 = PGoApiRequest()
+            request2.getMapObjects(selectedLocation?.latitude ?? Location.lat, longitude: selectedLocation?.longitude ?? Location.long)
+            request2.makeRequest(.GetMapObjects, delegate: self)
             
         }
     }
